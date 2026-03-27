@@ -1,7 +1,9 @@
 EventEase Venue Booking System
 A cloud-based venue booking platform built for EventEase, an event management company. Thesystem allows booking specialists to manage venues, events, and bookings from a single adminplatform.
-📋 Project Overview
-EventEase was overwhelmed with managing multiple venue bookings manually, leading todouble bookings, last-minute cancellations, and a lack of visibility into venue availability. Thisplatform solves that by providing a centralised, cloud-powered booking management system.
+
+Project Overview
+EventEase was overwhelmed with managing multiple venue bookings manually, leading todouble bookings, last-minute cancellations, and a lack of visibility into venue availability. 
+This platform solves that by providing a centralised, cloud-powered booking management system.
 Features
 Venue Management
 — Create, view, update, and delete venues with name, location,capacity, and image URL
@@ -15,7 +17,6 @@ Deletion Restrictions
 — Venues and events with existing bookings cannot be deleted
 Cloud Deployment
 — Fully deployed on Microsoft Azure (App Service + Azure SQLDatabase)
-
 Tech Stack
 Framework    ASP.NET Core MVC (.NET 8)
 Language     C#
