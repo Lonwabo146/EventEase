@@ -12,9 +12,8 @@ namespace EventEase.Services
 
         public BlobStorageService(IConfiguration configuration)
         {
-            _connectionString = configuration["AzureBlobStorage:ConnectionString"];
-            _containerName = configuration["AzureBlobStorage:ContainerName"];
-
+           _connectionString = configuration["BlobStorage:ConnectionString"];
+            _containerName = configuration["BlobStorage:ContainerName"];
 
         }
         public async Task<string> UploadImageAsync(IFormFile file)
