@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using CLDV_Part1.Data;
-using CLDV_Part1.Models;
+using EventEase.Data;
+using EventEase.Models;
 
-namespace CLDV_Part1.Controllers
+namespace EventEase.Controllers
 {
     public class BookingsController : Controller
     {
@@ -19,29 +19,36 @@ namespace CLDV_Part1.Controllers
             _context = context;
         }
 
-        // GET: Bookings
-        public async Task<IActionResult> Index()
+        // GET: Bookings - Now uses consolidated view with search
+        public async Task<IActionResult> Index(string searchString)
         {
-            var applicationDbContext = _context.Bookings.Include(b => b.Event).Include(b => b.Venue);
-            return View(await applicationDbContext.ToListAsync());
+            ViewData["CurrentFilter"] = searchString;
+
+            var bookings = _context.BookingDetailsView.AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                // Search by BookingId or Event Name
+                bool isNumber = int.TryParse(searchString, out int bookingId);
+
+                bookings = bookings.Where(b =>
+                    (isNumber && b.BookingId == bookingId) ||
+                    b.EventName.Contains(searchString));
+            }
+
+            return View(await bookings.ToListAsync());
         }
 
         // GET: Bookings/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var booking = await _context.Bookings
                 .Include(b => b.Event)
                 .Include(b => b.Venue)
                 .FirstOrDefaultAsync(m => m.BookingId == id);
-            if (booking == null)
-            {
-                return NotFound();
-            }
+            if (booking == null) return NotFound();
 
             return View(booking);
         }
@@ -55,14 +62,13 @@ namespace CLDV_Part1.Controllers
         }
 
         // POST: Bookings/Create
-        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("BookingId,EventId,VenueId,BookingDate")] Booking booking)
         {
-
             ModelState.Remove("Event");
             ModelState.Remove("Venue");
+
             if (ModelState.IsValid)
             {
                 // Check for double booking (same venue, same date)
@@ -91,33 +97,25 @@ namespace CLDV_Part1.Controllers
         // GET: Bookings/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var booking = await _context.Bookings.FindAsync(id);
-            if (booking == null)
-            {
-                return NotFound();
-            }
+            if (booking == null) return NotFound();
+
             ViewData["EventId"] = new SelectList(_context.Events, "EventId", "EventName", booking.EventId);
-            ViewData["VenueId"] = new SelectList(_context.Venues, "VenueId", "Location", booking.VenueId);
+            ViewData["VenueId"] = new SelectList(_context.Venues, "VenueId", "VenueName", booking.VenueId);
             return View(booking);
         }
 
         // POST: Bookings/Edit/5
-       
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("BookingId,EventId,VenueId,BookingDate")] Booking booking)
         {
             ModelState.Remove("Event");
             ModelState.Remove("Venue");
-            if (id != booking.BookingId)
-            {
-                return NotFound();
-            }
+
+            if (id != booking.BookingId) return NotFound();
 
             if (ModelState.IsValid)
             {
@@ -143,15 +141,10 @@ namespace CLDV_Part1.Controllers
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!BookingExists(booking.BookingId))
-                    {
                         return NotFound();
-                    }
                     else
-                    {
                         throw;
-                    }
                 }
-
                 return RedirectToAction(nameof(Index));
             }
 
@@ -163,19 +156,13 @@ namespace CLDV_Part1.Controllers
         // GET: Bookings/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var booking = await _context.Bookings
                 .Include(b => b.Event)
                 .Include(b => b.Venue)
                 .FirstOrDefaultAsync(m => m.BookingId == id);
-            if (booking == null)
-            {
-                return NotFound();
-            }
+            if (booking == null) return NotFound();
 
             return View(booking);
         }

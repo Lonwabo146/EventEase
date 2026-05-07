@@ -1,7 +1,7 @@
-﻿using CLDV_Part1.Models;
+﻿using EventEase.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace CLDV_Part1.Data
+namespace EventEase.Data
 {
     public class ApplicationDbContext : DbContext
     {
@@ -13,7 +13,7 @@ namespace CLDV_Part1.Data
         public DbSet<Venue> Venues { get; set; }
         public DbSet<Event> Events { get; set; }
         public DbSet<Booking> Bookings { get; set; }
-
+        public DbSet<BookingDetailsView> BookingDetailsView { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -38,6 +38,10 @@ namespace CLDV_Part1.Data
                 .WithMany(e => e.Bookings)
                 .HasForeignKey(b => b.EventId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            
+                 modelBuilder.Entity<BookingDetailsView>()
+                 .ToView("vw_BookingDetails");
         }
     }
 }

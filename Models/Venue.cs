@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
-namespace CLDV_Part1.Models
+namespace EventEase.Models
 {
     public class Venue
     {

@@ -5,8 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using CLDV_Part1.Data;
-using CLDV_Part1.Models;
+using EventEase.Data;
+using EventEase.Models;
+
 
 namespace CLDV_Part1.Controllers
 {

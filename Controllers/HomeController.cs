@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using CLDV_Part1.Models;
+using EventEase.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CLDV_Part1.Controllers

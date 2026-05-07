@@ -1,9 +1,12 @@
-using CLDV_Part1.Data;
+
+using EventEase.Data;
+using EventEase.Services;
 using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddSingleton<EventEase.Services.BlobStorageService>();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(

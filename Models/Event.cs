@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace CLDV_Part1.Models
+namespace EventEase.Models
 {
     public class Event
     {

@@ -1,4 +1,4 @@
-namespace CLDV_Part1.Models
+namespace EventEase.Models
 {
     public class ErrorViewModel
     {

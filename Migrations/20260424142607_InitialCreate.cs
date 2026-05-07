@@ -20,7 +20,7 @@ namespace CLDV_Part1.Migrations
                     VenueName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Location = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     Capacity = table.Column<int>(type: "int", nullable: false),
-                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -35,7 +35,7 @@ namespace CLDV_Part1.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     EventName = table.Column<string>(type: "nvarchar(120)", maxLength: 120, nullable: false),
                     EventDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     VenueId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -45,7 +45,8 @@ namespace CLDV_Part1.Migrations
                         name: "FK_Events_Venues_VenueId",
                         column: x => x.VenueId,
                         principalTable: "Venues",
-                        principalColumn: "VenueId");
+                        principalColumn: "VenueId",
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
@@ -78,8 +79,7 @@ namespace CLDV_Part1.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Bookings_EventId",
                 table: "Bookings",
-                column: "EventId",
-                unique: true);
+                column: "EventId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Bookings_VenueId",
