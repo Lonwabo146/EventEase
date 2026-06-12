@@ -19,21 +19,60 @@ namespace EventEase.Controllers
             _context = context;
         }
 
-        // GET: Bookings - Now uses consolidated view with search
-        public async Task<IActionResult> Index(string searchString)
+        // GET: Bookings - consolidated view with search and filters
+        public async Task<IActionResult> Index(
+            string searchString,
+            string eventTypeFilter,
+            DateTime? startDate,
+            DateTime? endDate,
+            string availabilityFilter)
         {
+            // Preserve filter values for the view
             ViewData["CurrentFilter"] = searchString;
+            ViewData["EventTypeFilter"] = eventTypeFilter;
+            ViewData["StartDate"] = startDate?.ToString("yyyy-MM-dd");
+            ViewData["EndDate"] = endDate?.ToString("yyyy-MM-dd");
+            ViewData["AvailabilityFilter"] = availabilityFilter;
+
+            // Populate EventType dropdown
+            ViewData["EventTypes"] = new SelectList(
+                _context.EventType.OrderBy(e => e.EventTypeName),
+                "EventTypeName",
+                "EventTypeName"
+            );
 
             var bookings = _context.BookingDetailsView.AsQueryable();
 
+            // Search by BookingId or Event Name
             if (!string.IsNullOrEmpty(searchString))
             {
-                // Search by BookingId or Event Name
                 bool isNumber = int.TryParse(searchString, out int bookingId);
-
                 bookings = bookings.Where(b =>
                     (isNumber && b.BookingId == bookingId) ||
                     b.EventName.Contains(searchString));
+            }
+
+            // Filter by Event Type
+            if (!string.IsNullOrEmpty(eventTypeFilter))
+            {
+                bookings = bookings.Where(b => b.EventTypeName == eventTypeFilter);
+            }
+
+            // Filter by Date Range
+            if (startDate.HasValue)
+            {
+                bookings = bookings.Where(b => b.EventDate >= startDate.Value);
+            }
+            if (endDate.HasValue)
+            {
+                bookings = bookings.Where(b => b.EventDate <= endDate.Value);
+            }
+
+            // Filter by Venue Availability
+            if (!string.IsNullOrEmpty(availabilityFilter))
+            {
+                bool isAvailable = availabilityFilter == "available";
+                bookings = bookings.Where(b => b.IsAvailable == isAvailable);
             }
 
             return View(await bookings.ToListAsync());
@@ -57,7 +96,11 @@ namespace EventEase.Controllers
         public IActionResult Create()
         {
             ViewData["EventId"] = new SelectList(_context.Events, "EventId", "EventName");
-            ViewData["VenueId"] = new SelectList(_context.Venues, "VenueId", "VenueName");
+            ViewData["VenueId"] = new SelectList(
+                _context.Venues.Where(v => v.IsAvailable),
+                "VenueId",
+                "VenueName"
+            );
             return View();
         }
 
@@ -80,7 +123,9 @@ namespace EventEase.Controllers
                 {
                     TempData["Error"] = "This venue is already booked for the selected date.";
                     ViewData["EventId"] = new SelectList(_context.Events, "EventId", "EventName", booking.EventId);
-                    ViewData["VenueId"] = new SelectList(_context.Venues, "VenueId", "VenueName", booking.VenueId);
+                    ViewData["VenueId"] = new SelectList(
+                        _context.Venues.Where(v => v.IsAvailable),
+                        "VenueId", "VenueName", booking.VenueId);
                     return View(booking);
                 }
 
@@ -90,7 +135,9 @@ namespace EventEase.Controllers
             }
 
             ViewData["EventId"] = new SelectList(_context.Events, "EventId", "EventName", booking.EventId);
-            ViewData["VenueId"] = new SelectList(_context.Venues, "VenueId", "VenueName", booking.VenueId);
+            ViewData["VenueId"] = new SelectList(
+                _context.Venues.Where(v => v.IsAvailable),
+                "VenueId", "VenueName", booking.VenueId);
             return View(booking);
         }
 
@@ -119,7 +166,6 @@ namespace EventEase.Controllers
 
             if (ModelState.IsValid)
             {
-                // Prevent double booking when editing
                 bool conflict = await _context.Bookings.AnyAsync(b =>
                     b.BookingId != booking.BookingId &&
                     b.VenueId == booking.VenueId &&

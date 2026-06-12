@@ -16,27 +16,101 @@
     <a asp-action="Create" class="btn btn-primary">+ Add Booking</a>
 </div>
 
-<!-- Search Bar -->
+<!-- Search and Filter Form -->
 <form asp-action="Index" method="get" class="mb-4">
-    <div class="input-group" style="max-width: 450px;">
-        <input type="text" name="searchString" class="form-control"
-               placeholder="Search by Booking ID or Event Name..."
-               value="@ViewData["CurrentFilter"]" />
-        <button type="submit" class="btn btn-outline-primary">Search</button>
-        <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="row g-3">
+
+                <!-- Search -->
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Search</label>
+                    <input type="text" name="searchString" class="form-control"
+                           placeholder="Booking ID or Event Name"
+                           value="@ViewData["CurrentFilter"]" />
+                </div>
+
+                <!-- Event Type Filter -->
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Event Type</label>
+                    <select name="eventTypeFilter" class="form-select">
+                        <option value="">-- All Event Types --</option>
+                        @foreach (var item in ViewData["EventTypes"] as SelectList)
+                        {
+                            if (item.Value == ViewData["EventTypeFilter"]?.ToString())
+                            {
+                                <option value="@item.Value" selected>@item.Text</option>
+                            }
+                            else
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <!-- Start Date -->
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">From Date</label>
+                    <input type="date" name="startDate" class="form-control"
+                           value="@ViewData["StartDate"]" />
+                </div>
+
+                <!-- End Date -->
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">To Date</label>
+                    <input type="date" name="endDate" class="form-control"
+                           value="@ViewData["EndDate"]" />
+                </div>
+
+                <!-- Availability Filter -->
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">Venue Availability</label>
+                    <select name="availabilityFilter" class="form-select">
+                        <option value="">-- All --</option>
+                        @if (ViewData["AvailabilityFilter"]?.ToString() == "available")
+                        {
+                            <option value="available" selected>Available</option>
+                            <option value="unavailable">Unavailable</option>
+                        }
+                        else if (ViewData["AvailabilityFilter"]?.ToString() == "unavailable")
+                        {
+                            <option value="available">Available</option>
+                            <option value="unavailable" selected>Unavailable</option>
+                        }
+                        else
+                        {
+                            <option value="available">Available</option>
+                            <option value="unavailable">Unavailable</option>
+                        }
+                    </select>
+                </div>
+
+            </div>
+
+            <!-- Buttons -->
+            <div class="row mt-3">
+                <div class="col">
+                    <button type="submit" class="btn btn-primary">🔍 Search & Filter</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary ms-2">Clear</a>
+                </div>
+            </div>
+        </div>
     </div>
 </form>
 
+<!-- Results Table -->
 <table class="table table-hover table-bordered align-middle">
     <thead class="table-dark">
         <tr>
             <th>Booking ID</th>
             <th>Booking Date</th>
             <th>Event Name</th>
+            <th>Event Type</th>
             <th>Event Date</th>
             <th>Venue Name</th>
             <th>Location</th>
-            <th>Capacity</th>
+            <th>Availability</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -47,10 +121,29 @@
                 <td>@item.BookingId</td>
                 <td>@item.BookingDate.ToString("dd MMM yyyy")</td>
                 <td>@item.EventName</td>
+                <td>
+                    @if (!string.IsNullOrEmpty(item.EventTypeName))
+                    {
+                        <span class="badge bg-primary">@item.EventTypeName</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted" style="font-size:0.85rem;">Not assigned</span>
+                    }
+                </td>
                 <td>@item.EventDate.ToString("dd MMM yyyy")</td>
                 <td>@item.VenueName</td>
                 <td>@item.Location</td>
-                <td>@item.Capacity</td>
+                <td>
+                    @if (item.IsAvailable)
+                    {
+                        <span class="badge bg-success">Available</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Unavailable</span>
+                    }
+                </td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.BookingId" class="btn btn-sm btn-outline-primary">Edit</a>
                     <a asp-action="Details" asp-route-id="@item.BookingId" class="btn btn-sm btn-outline-secondary">Details</a>
@@ -64,6 +157,8 @@
 @if (!Model.Any())
 {
     <div class="alert alert-info">
-        No bookings found. <a asp-action="Create">Create a new booking.</a>
+        No bookings found matching your search criteria.
+        <a asp-action="Index">Clear filters</a> or
+        <a asp-action="Create">create a new booking.</a>
     </div>
 }

@@ -1,5 +1,4 @@
-﻿
-using EventEase.Models;
+﻿using EventEase.Models;
 using EventEase.Data;
 using EventEase.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CLDV_Part1.Controllers
+namespace EventEase.Controllers
 {
     public class VenuesController : Controller
     {
@@ -50,7 +49,7 @@ namespace CLDV_Part1.Controllers
         // POST: Venues/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("VenueId,VenueName,Location,Capacity")] Venue venue, IFormFile? imageFile)
+        public async Task<IActionResult> Create([Bind("VenueId,VenueName,Location,Capacity,IsAvailable")] Venue venue, IFormFile? imageFile)
         {
             ModelState.Remove("ImageUrl");
             ModelState.Remove("Events");
@@ -58,7 +57,6 @@ namespace CLDV_Part1.Controllers
 
             if (ModelState.IsValid)
             {
-                // Upload image if provided
                 if (imageFile != null && imageFile.Length > 0)
                 {
                     venue.ImageUrl = await _blobStorageService.UploadImageAsync(imageFile);
@@ -85,7 +83,7 @@ namespace CLDV_Part1.Controllers
         // POST: Venues/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("VenueId,VenueName,Location,Capacity,ImageUrl")] Venue venue, IFormFile? imageFile)
+        public async Task<IActionResult> Edit(int id, [Bind("VenueId,VenueName,Location,Capacity,ImageUrl,IsAvailable")] Venue venue, IFormFile? imageFile)
         {
             if (id != venue.VenueId) return NotFound();
 
@@ -97,10 +95,8 @@ namespace CLDV_Part1.Controllers
             {
                 try
                 {
-                    // Upload new image if provided
                     if (imageFile != null && imageFile.Length > 0)
                     {
-                        // Delete old image if exists
                         if (!string.IsNullOrEmpty(venue.ImageUrl))
                         {
                             await _blobStorageService.DeleteImageAsync(venue.ImageUrl);
@@ -140,9 +136,7 @@ namespace CLDV_Part1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            // Check for bookings directly
             var hasBookings = await _context.Bookings.AnyAsync(b => b.VenueId == id);
-
             if (hasBookings)
             {
                 TempData["Error"] = "Cannot delete this venue because it has existing bookings.";
@@ -152,7 +146,6 @@ namespace CLDV_Part1.Controllers
             var venue = await _context.Venues.FindAsync(id);
             if (venue == null) return NotFound();
 
-            // Delete image from blob storage if exists
             if (!string.IsNullOrEmpty(venue.ImageUrl))
             {
                 await _blobStorageService.DeleteImageAsync(venue.ImageUrl);
@@ -162,6 +155,7 @@ namespace CLDV_Part1.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
         private bool VenueExists(int id)
         {
             return _context.Venues.Any(e => e.VenueId == id);

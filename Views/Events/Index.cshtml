@@ -20,6 +20,7 @@
     <thead class="table-dark">
         <tr>
             <th>Event Name</th>
+            <th>Event Type</th>
             <th>Event Date</th>
             <th>Description</th>
             <th>Venue</th>
@@ -31,6 +32,16 @@
         {
             <tr>
                 <td>@item.EventName</td>
+                <td>
+                    @if (item.EventType != null)
+                    {
+                        <span class="badge bg-primary">@item.EventType.EventTypeName</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted" style="font-size:0.85rem;">Not assigned</span>
+                    }
+                </td>
                 <td>@item.EventDate.ToString("dd MMM yyyy HH:mm")</td>
                 <td>
                     @if (!string.IsNullOrEmpty(item.Description))

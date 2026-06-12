@@ -14,6 +14,7 @@ namespace EventEase.Data
         public DbSet<Event> Events { get; set; }
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<BookingDetailsView> BookingDetailsView { get; set; }
+        public DbSet<EventType> EventType { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -37,6 +38,13 @@ namespace EventEase.Data
                 .HasOne(b => b.Event)
                 .WithMany(e => e.Bookings)
                 .HasForeignKey(b => b.EventId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+                //EventType -> (one-to-many)
+                 modelBuilder.Entity<Event>()
+                .HasOne(e => e.EventType)
+                .WithMany()
+                .HasForeignKey(e => e.EventTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             

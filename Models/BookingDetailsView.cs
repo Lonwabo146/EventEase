@@ -29,6 +29,12 @@ namespace EventEase.Models
             [Display(Name = "Event Name")]
             public string EventName { get; set; } = string.Empty;
 
+             [Display(Name = "Available")]
+             public bool IsAvailable { get; set; }
+
+             [Display(Name = "Event Type")]
+            public string? EventTypeName { get; set; }
+
             [Display(Name = "Event Date")]
             public DateTime EventDate { get; set; }
 

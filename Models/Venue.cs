@@ -1,5 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 namespace EventEase.Models
 {
     public class Venue
@@ -17,8 +18,11 @@ namespace EventEase.Models
             public string Location { get; set; }
 
             [Required]
-           
-            public int Capacity { get; set; }
+        
+            [Display(Name = "Available")]
+            
+        public bool IsAvailable { get; set; } = true;
+        public int Capacity { get; set; }
 
             [Display(Name = "Venue Image")]
             public string? ImageUrl { get; set; }

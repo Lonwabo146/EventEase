@@ -1,4 +1,5 @@
 ﻿
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -20,6 +21,8 @@ namespace EventEase.Models
         [Required]
         [Display(Name = "Booking Date")]
         public DateTime BookingDate { get; set; }
+
+        
 
         // Navigation properties
         public Event Event { get; set; }
